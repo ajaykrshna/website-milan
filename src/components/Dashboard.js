@@ -1,11 +1,29 @@
-import React, { useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
+import { UserContext } from "../providers/UserProvider";
+import { useNavigate } from "react-router-dom";
 
-export default function Form() {
+
+export default function Dashboard() {
+    const user = useContext(UserContext);
+
+    const navigate = useNavigate();
+
+    const [redirect, setredirect] = useState(null);
+
+    useEffect(() => {
+        if (!user) {
+            setredirect("/");
+        }
+    }, [user]);
+    if (redirect) {
+        navigate(redirect)
+    }
+
     const [formPersData, setFormPersData] = useState(
         {
-            name: "",
+            name: user ? user.displayName : "",
             branch: "",
-            rollno: "",
+            rollno: user ? user.email.split("@")[0].toUpperCase() : "",
             hostel: ""
         }
     )
@@ -33,23 +51,34 @@ export default function Form() {
                 [name]: value
             }
         })
-        console.log(formPersData)
     }
 
-    function handleTick(event){
-        const {name, value, type, checked} = event.target
+    function handleTick(event) {
+        const { name, value, type, checked } = event.target
         setFormEventData(prevData => {
             return {
                 ...prevData,
                 [name]: type === "checkbox" ? checked : value
             }
         })
-        console.log(formEventData)
     }
+
+    function handleClick(event) {
+        event.preventDefault()
+        !formPersData.hostel && console.log("error");
+        console.log(formPersData)
+    }
+
+
+    const warnMess = (
+        <div className="warningmess">
+            <p className="mess">Please fill out this field</p>
+        </div>
+    )
     return (
         <div className="form--div">
-            <h1 className="mainhead">MILAN Registration</h1>
-            <form className="form">
+            <h1 className="mainhead">Register</h1>
+            <form className="form" noValidate>
                 <div className="form--personaldata">
                     <div className="form--head--personaldata">
                         <h2 className="form--head--text">Personal Info</h2>
@@ -67,7 +96,9 @@ export default function Form() {
                                     id="name"
                                     value={formPersData.name}
                                     onChange={handleChange}
-                                    required />
+                                    required
+                                    readOnly
+                                     />
                             </div>
                             <div className="form--elem">
                                 <label className="form--label" htmlFor="branch">Branch</label>
@@ -80,6 +111,7 @@ export default function Form() {
                                     value={formPersData.branch}
                                     onChange={handleChange}
                                     required />
+                                {!formPersData.branch && warnMess}
                             </div>
                         </div>
                         <div className="form--personaldata--form--name">
@@ -93,7 +125,8 @@ export default function Form() {
                                     name="rollno"
                                     value={formPersData.rollno}
                                     onChange={handleChange}
-                                    required />
+                                    required 
+                                    readOnly/>
                             </div>
                             <div className="form--elem">
                                 <label className="form--label" htmlFor="hostel">Hostel</label>
@@ -106,6 +139,7 @@ export default function Form() {
                                     value={formPersData.hostel}
                                     onChange={handleChange}
                                     required />
+                                    {!formPersData.hostel && warnMess}
                             </div>
                         </div>
                     </div>
@@ -240,9 +274,9 @@ export default function Form() {
                     </div>
                 </div>
                 <div className="buttondiv">
-                    <button className="buttonsubmit">Submit</button>
+                    <button className="buttonsubmit" onClick={handleClick}>Submit</button>
                 </div>
             </form>
         </div>
-    )
+    );
 }
