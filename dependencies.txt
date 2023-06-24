@@ -1,3 +1,0 @@
-dependencies:
- react-router-dom
- firebase
